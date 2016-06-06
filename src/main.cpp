@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <queue>
 #include "CGraph.h"
 
 using namespace std;
@@ -15,7 +16,7 @@ int main(int argc, char** argv)
         cout << "Error openning file" << endl;
         return 0;
     }
-    size_t verticesCount = 0;
+    int verticesCount = 0;
     fInput >> verticesCount;
     if(verticesCount == 0)
     {
@@ -24,53 +25,112 @@ int main(int argc, char** argv)
     }
     
     // graph reading
-    Graph<size_t> graph(verticesCount);
+    CGraph firstCGraph(verticesCount);
     while(!fInput.eof())
     {
-        size_t v1 = 0, v2 = 0;
+        int v1 = 0, v2 = 0;
         fInput >> v1;
         fInput >> v2;
-        graph.AddEdge(v1, v2);
-    }
-    
-    vector<Graph::VerticesSet> components;
-    
-    //finding components
-    while(true)
+        firstCGraph.AddEdge(v1, v2);
+    };
+    //try
     {
-        Graph::VerticesSet fwd = graph.GetForwardBFSVisited();
-        Graph::VerticesSet bwd = graph.GetBackwardBFSVisited();
-        Graph::VerticesSet unvisited = graph.GetUnvisited();
+        queue<CGraph> graphsQueue;
+        graphsQueue.push(move(firstCGraph));
+        vector<CGraph::VerticesSet> components;
         
-        Graph::VerticesSet component;
-        Graph::VerticesSet verticesFoundedInFwdButNotInBwd;
-        Graph::VerticesSet verticesFoundedInBwdButNotInFwd;
-        for(auto& vertex : fwd)
+        //finding components
+        while(!graphsQueue.empty())
         {
-            if(bwd.find(vertex) != bwd.end())
+            auto graph = graphsQueue.front();
+            graphsQueue.pop();
+            int pivot = graph.GetRandomVertex();
+            CGraph::VerticesSet fwd = graph.GetForwardBFSVisited(pivot);
+            CGraph::VerticesSet bwd = graph.GetBackwardBFSVisited(pivot);
+            CGraph::VerticesSet unvisited = graph.GetUnvisited(fwd, bwd);
+            
+            CGraph::VerticesSet component;
+            CGraph::VerticesSet verticesFoundedInFwdButNotInBwd;
+            CGraph::VerticesSet verticesFoundedInBwdButNotInFwd;
+            // writing components
+            for(auto& vertex : fwd)
             {
-                component.insert(vertex);
+                if(bwd.find(vertex) != bwd.end())
+                {
+                    component.insert(vertex);
+                }
+                else
+                {
+                    verticesFoundedInFwdButNotInBwd.insert(vertex);
+                }
+            }
+            
+            for(auto& vertex : bwd)
+            {
+                if(fwd.find(vertex) == fwd.end())
+                {
+                    verticesFoundedInBwdButNotInFwd.insert(vertex);
+                }
+            }
+            // check founded in bwd but not founded in fwd size
+            if(verticesFoundedInFwdButNotInBwd.size() == 1)
+            {
+                CGraph::VerticesSet simpleComponent;
+                simpleComponent.insert(*(verticesFoundedInFwdButNotInBwd.begin()));
+                components.push_back(move(simpleComponent));
             }
             else
             {
-                verticesFoundedInFwdButNotInBwd.insert(vertex);
+                if(!verticesFoundedInFwdButNotInBwd.empty())
+                {
+                    auto newGraph = graph.CreateGraphFromVertices(verticesFoundedInFwdButNotInBwd);
+                    graphsQueue.push(move(newGraph));
+                }
+            }
+            // check founded in fwd but not founded in bwd size
+            if(verticesFoundedInBwdButNotInFwd.size() == 1)
+            {
+                CGraph::VerticesSet simpleComponent;
+                simpleComponent.insert(*(verticesFoundedInBwdButNotInFwd.begin()));
+                components.push_back(move(simpleComponent));
+            }
+            else
+            {
+                if(!verticesFoundedInBwdButNotInFwd.empty())
+                {
+                    auto newGraph = graph.CreateGraphFromVertices(verticesFoundedInBwdButNotInFwd);
+                    graphsQueue.push(move(newGraph));
+                }
+            }
+            // check unvisited size
+            if(unvisited.size() == 1)
+            {
+                CGraph::VerticesSet simpleComponent;
+                simpleComponent.insert(*(unvisited.begin()));
+                components.push_back(move(simpleComponent));   
+            }
+            else
+            {
+                if(!unvisited.empty())
+                {
+                    auto newGraph = graph.CreateGraphFromVertices(unvisited);
+                    graphsQueue.push(move(newGraph));
+                }   
             }
         }
         
-        for(auto& vertex : bwd)
+        for(auto& component : components)
         {
-            if(fwd.find(vertex) == fwd.end())
+            for(auto& vertex : component)
             {
-                verticesFoundedInBwdButNotInFwd.insert(vertex);
+                cout << vertex << " ";
             }
-        }
-        if((verticesFoundedInFwdButNotInBwd.size() == 1) && (verticesFoundedInBwdButNotInFwd.size() == 1))
-        {
-            Graph::VerticesSet simpleComponent;
-            simpleComponent.insert(verticesFoundedInFwdButNotInBwd.begin()
-            components
+            cout << endl;
         }
     }
-    
+    /*catch(exception& ex)
+    {
+        cout << ex.what() << endl;
+    }*/
     return 0;
 }

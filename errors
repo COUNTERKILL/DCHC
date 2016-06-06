@@ -1,0 +1,2 @@
+test -d ./bin || mkdir ./bin
+g++ -std=c++11 -pthread ./src/main.cpp ./src/CGraph.cpp -o ./bin/main.o	

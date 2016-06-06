@@ -3,39 +3,40 @@
 
 using namespace std;
 
-void CGraph::CGraph(size_t verticesCount)
+CGraph::CGraph(const std::size_t verticesCount)
 {
     m_verticesCount = verticesCount;
     m_fwdData.reserve(verticesCount);
     m_bwdData.reserve(verticesCount);
 }
-    
-    
-void CGraph::AddEdge(VertexNumberType firstVertex,
-                     VertexNumberType secondVertex)
+     
+void CGraph::AddEdge(size_t firstVertex,
+                     size_t secondVertex)
 {
     if(m_fwdData.find(firstVertex) == m_fwdData.end())
-        m_fwdData[firstVertex] = vector<VertexNumberType>();
+        m_fwdData[firstVertex] = vector<size_t>();
     if(m_bwdData.find(secondVertex) == m_bwdData.end())
-        m_bwdData[secondVertex] = vector<VertexNumberType>();
+        m_bwdData[secondVertex] = vector<size_t>();
     m_fwdData.at(firstVertex).push_back(secondVertex);
     m_bwdData.at(secondVertex).push_back(firstVertex);
+    return;
 }
 
-VerticesSet CGraph::GetForwardBFSVisited(VertexNumberType pivot)
+
+CGraph::VerticesSet CGraph::GetForwardBFSVisited(size_t pivot)
 {
     VerticesSet res;
     
-    queue bfsQueue;
+    queue<size_t> bfsQueue;
     bfsQueue.push(pivot);
     
     while(!bfsQueue.empty())
     {
         for(auto& vertex : m_fwdData.at(bfsQueue.front()))
         {
-            if(!res.find(vertex))
+            if(res.find(vertex) == res.end())
             {
-                fsQueue.push(vertex);
+                bfsQueue.push(vertex);
                 res.insert(vertex);
             } 
         }
@@ -45,18 +46,19 @@ VerticesSet CGraph::GetForwardBFSVisited(VertexNumberType pivot)
     return res;
 }
 
-VerticesSet CGraph::GetBackwardBFSVisited(VertexNumberType pivot)
+
+typename CGraph::VerticesSet CGraph::GetBackwardBFSVisited(size_t pivot)
 {
     VerticesSet res;
-    queue bfsQueue;
+    queue<size_t> bfsQueue;
     bfsQueue.push(pivot);
     while(!bfsQueue.empty())
     {
         for(auto& vertex : m_bwdData.at(bfsQueue.front()))
         {
-            if(!res.find(vertex))
+            if(res.find(vertex) == res.end())
             {
-                fsQueue.push(vertex);
+                bfsQueue.push(vertex);
                 res.insert(vertex);
             } 
         }
@@ -67,7 +69,7 @@ VerticesSet CGraph::GetBackwardBFSVisited(VertexNumberType pivot)
 }
 
 
-VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited, 
+typename CGraph::VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited, 
                                  VerticesSet& bwdVisited)
 {
     VerticesSet res;
@@ -78,10 +80,10 @@ VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited,
     }
     return res;
 }
-    
-Graph<VertexNumberType> CGraph::CreateGraphFromVertices(const VerticesSet& vertices)
+
+CGraph CGraph::CreateGraphFromVertices(const VerticesSet& vertices)
 {
-    Graph res(vertices.size());
+    CGraph res(vertices.size());
     for(auto& vertexInSet : vertices)
     {
         for(auto& vertex : m_fwdData.at(vertexInSet))

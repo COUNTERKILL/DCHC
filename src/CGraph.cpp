@@ -70,8 +70,13 @@ VerticesSet CGraph::GetBackwardBFSVisited(VertexNumberType pivot)
 VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited, 
                                  VerticesSet& bwdVisited)
 {
-    for(auto& kv : 
-        // TODO
+    VerticesSet res;
+    for(auto& kv : m_fwdData)
+    {
+        if((fwdVisited.find(kv.first) == fwdVisited.end()) & (bwdVisited.find(kv.first) == bwdVisited.end()))
+            res.insert(kv.first);
+    }
+    return res;
 }
     
 Graph<VertexNumberType> CGraph::CreateGraphFromVertices(const VerticesSet& vertices)
@@ -85,6 +90,7 @@ Graph<VertexNumberType> CGraph::CreateGraphFromVertices(const VerticesSet& verti
                 res.AddEdge(vertexInSet, vertex);
         }
     }
+    
     return res;
 }
 

@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=-std=c++11 -pthread -g
+CC=icpc
+CFLAGS=-std=c++11 -mmic
 LDFLAGS=
 SRC_DIR=./src
 SOURCES=./src/main.cpp ./src/CGraph.cpp

@@ -42,7 +42,7 @@ int main(int argc, char** argv)
         //finding components
         while(!graphsQueue.empty())
         {
-            auto graph = graphsQueue.front();
+            auto& graph = graphsQueue.front();
             graphsQueue.pop();
             int pivot = graph.GetRandomVertex();
             CGraph::VerticesSet fwd = graph.GetForwardBFSVisited(pivot);
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
                     verticesFoundedInFwdButNotInBwd.insert(vertex);
                 }
             }
-            
+            components.push_back(move(component));
             for(auto& vertex : bwd)
             {
                 if(fwd.find(vertex) == fwd.end())
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
                 }   
             }
         }
-        
+        cout << "result: " << endl;
         for(auto& component : components)
         {
             for(auto& vertex : component)

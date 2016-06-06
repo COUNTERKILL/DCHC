@@ -1,5 +1,6 @@
 #include "CGraph.h"
 #include <queue>
+#include <iostream>
 
 using namespace std;
 
@@ -9,7 +10,29 @@ CGraph::CGraph(const std::size_t verticesCount)
     m_fwdData.reserve(verticesCount);
     m_bwdData.reserve(verticesCount);
 }
-     
+
+
+CGraph::~CGraph()
+{
+
+}
+
+CGraph::CGraph(CGraph&& graph)
+{
+    m_fwdData = move(graph.m_fwdData);
+    m_bwdData = move(graph.m_bwdData);
+    m_verticesCount = graph.m_verticesCount;
+    graph.m_verticesCount = 0;
+}
+    
+CGraph& CGraph::operator=(CGraph&& graph)
+{
+    m_fwdData = move(graph.m_fwdData);
+    m_bwdData = move(graph.m_bwdData);
+    m_verticesCount = graph.m_verticesCount;
+    graph.m_verticesCount = 0;
+    return *this;
+}
 void CGraph::AddEdge(size_t firstVertex,
                      size_t secondVertex)
 {
@@ -17,6 +40,12 @@ void CGraph::AddEdge(size_t firstVertex,
         m_fwdData[firstVertex] = vector<size_t>();
     if(m_bwdData.find(secondVertex) == m_bwdData.end())
         m_bwdData[secondVertex] = vector<size_t>();
+    
+    if(m_fwdData.find(secondVertex) == m_fwdData.end())
+        m_fwdData[secondVertex] = vector<size_t>();
+    if(m_bwdData.find(firstVertex) == m_bwdData.end())
+        m_bwdData[firstVertex] = vector<size_t>();
+    
     m_fwdData.at(firstVertex).push_back(secondVertex);
     m_bwdData.at(secondVertex).push_back(firstVertex);
     return;
@@ -26,18 +55,33 @@ void CGraph::AddEdge(size_t firstVertex,
 CGraph::VerticesSet CGraph::GetForwardBFSVisited(size_t pivot)
 {
     VerticesSet res;
+    res.insert(pivot);
     
     queue<size_t> bfsQueue;
     bfsQueue.push(pivot);
+    cout << pivot << endl;
     
+    for(auto& verticesList : m_fwdData)
+    {
+        cout << "Vertex " << verticesList.first << ": ";
+        for(auto& vertex : verticesList.second)
+        {
+            cout << vertex << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
     while(!bfsQueue.empty())
     {
-        for(auto& vertex : m_fwdData.at(bfsQueue.front()))
+        cout << "front: " << bfsQueue.front() << endl;
+        auto& verticesList = m_fwdData.at(bfsQueue.front());
+        cout << 111 << endl;
+        for(auto pVertex = verticesList.begin(); pVertex != verticesList.end(); pVertex++)
         {
-            if(res.find(vertex) == res.end())
+            if(res.find(*pVertex) == res.end())
             {
-                bfsQueue.push(vertex);
-                res.insert(vertex);
+                bfsQueue.push(*pVertex);
+                res.insert(*pVertex);
             } 
         }
         bfsQueue.pop();

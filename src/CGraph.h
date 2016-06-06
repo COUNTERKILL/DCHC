@@ -16,10 +16,10 @@ public:
                                CGraph                  (const std::size_t verticesCount);
     virtual                    ~CGraph                 ();
 public:
-                               CGraph                  (const CGraph&)              = delete;
+                               CGraph                  (const CGraph&);
                                CGraph                  (CGraph&&);
 public:
-            CGraph&            operator=               (const CGraph&)                    = delete;
+            CGraph&            operator=               (const CGraph&);
             CGraph&            operator=               (CGraph&&);
 public:
             VerticesSet        GetForwardBFSVisited    (std::size_t);

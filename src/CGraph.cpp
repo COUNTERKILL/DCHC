@@ -24,6 +24,13 @@ CGraph::CGraph(CGraph&& graph)
     m_verticesCount = graph.m_verticesCount;
     graph.m_verticesCount = 0;
 }
+
+CGraph::CGraph(const CGraph& graph)
+{
+    m_fwdData = graph.m_fwdData;
+    m_bwdData = graph.m_bwdData;
+    m_verticesCount = graph.m_verticesCount;
+}
     
 CGraph& CGraph::operator=(CGraph&& graph)
 {
@@ -33,6 +40,16 @@ CGraph& CGraph::operator=(CGraph&& graph)
     graph.m_verticesCount = 0;
     return *this;
 }
+
+
+CGraph& CGraph::operator=(const CGraph& graph)
+{
+    m_fwdData = graph.m_fwdData;
+    m_bwdData = graph.m_bwdData;
+    m_verticesCount = graph.m_verticesCount;
+    return *this;
+}
+
 void CGraph::AddEdge(size_t firstVertex,
                      size_t secondVertex)
 {

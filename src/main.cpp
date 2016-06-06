@@ -42,7 +42,7 @@ int main(int argc, char** argv)
         //finding components
         while(!graphsQueue.empty())
         {
-            auto& graph = graphsQueue.front();
+            auto graph = graphsQueue.front();
             graphsQueue.pop();
             int pivot = graph.GetRandomVertex();
             CGraph::VerticesSet fwd = graph.GetForwardBFSVisited(pivot);

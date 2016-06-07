@@ -13,28 +13,18 @@ public:
 private:
     typedef std::unordered_map<std::size_t, std::vector<std::size_t>> TypeOfData;
 public:
-                               CGraph                  (const std::size_t verticesCount);
-    virtual                    ~CGraph                 ();
-public:
-                               CGraph                  (const CGraph&);
-                               CGraph                  (CGraph&&);
-public:
-            CGraph&            operator=               (const CGraph&);
-            CGraph&            operator=               (CGraph&&);
-public:
-            VerticesSet        GetForwardBFSVisited    (std::size_t);
-            VerticesSet        GetBackwardBFSVisited   (std::size_t);
-            VerticesSet        GetUnvisited            (VerticesSet&,
-                                                        VerticesSet&);
-public:
-       CGraph CreateGraphFromVertices(const VerticesSet&);
-public:
-            void               AddEdge                 (std::size_t firstVertex,
-                                                        std::size_t secondVertex);
-            std::size_t        GetRandomVertex         () { return m_fwdData.begin()->first; };
+    CGraph(const std::size_t verticesCount);
+    virtual ~CGraph();
+    CGraph(const CGraph&);
+    CGraph& operator=(const CGraph&);
+    VerticesSet ForwardBFS(std::size_t);
+    VerticesSet BackwardBFS(std::size_t);
+    VerticesSet GetUnvisited(VerticesSet&, VerticesSet&);
+    CGraph CreateGraphFromVertices(const VerticesSet&);
+    void AddEdge(const std::size_t firstVertex, const std::size_t secondVertex);
+    std::size_t GetRandomVertex() { return fwdData.begin()->first; };
 private:
-            TypeOfData          m_fwdData;
-            TypeOfData          m_bwdData;
-            std::size_t         m_verticesCount = 0;
-              
+    TypeOfData fwdData;
+    TypeOfData bwdData;
+    std::size_t verticesCount = 0;   
 };

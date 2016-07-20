@@ -15,6 +15,7 @@ using namespace std;
 
 size_t runnedJobsCount = 0;
 
+// AtomicGetJob() атомарно получает указатель на граф из очереди. Из очереди граф удаляется. После ипользования графа, память по указателю нужно удалить
 CGraph* AtomicGetJob(queue<CGraph>& graphsQueue)
 {
     CGraph *pRes = NULL;
@@ -30,7 +31,7 @@ CGraph* AtomicGetJob(queue<CGraph>& graphsQueue)
     return pRes;
 }
 
-
+// Обработчик события завершения обработки очередного графа. Уменьшает количество обрабатываемых в данный момент разными потоками графов
 void CompliteJob()
 {
     #pragma omp critical(job)

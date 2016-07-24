@@ -45,14 +45,14 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
     res.insert(pivot);
     
     vector<bool> d (verticesCount, true); // false - достижима, true - бесконечность (недостижима)
-	d[pivot] = 0;
+    d[pivot] = 0;
     
     bool any = false;
     do
     {
         any = false;
         for (size_t j = 0; j < edgesCount; j++)
-            if (!d[src[j]])
+            if (!d[src[j]] & d[dst[j]])
             {
                     d[dst[j]] = false;
                     res.insert(dst[j]);
@@ -69,14 +69,14 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
     res.insert(pivot);
     
     vector<bool> d (verticesCount, true); // false - достижима, true - бесконечность (недостижима)
-	d[pivot] = 0;
+    d[pivot] = 0;
     
     bool any = false;
     do
     {
         any = false;
         for (size_t j = 0; j < edgesCount; j++)
-            if (!d[dst[j]])
+            if (!d[dst[j]] & d[src[j]])
             {
                     d[src[j]] = false;
                     res.insert(src[j]);

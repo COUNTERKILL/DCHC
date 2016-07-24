@@ -6,23 +6,26 @@ using namespace std;
 
 CGraph::CGraph(const std::size_t verticesCount_)
 {
+    edgesCount = 0;
     verticesCount = verticesCount_;
-    fwdData.reserve(verticesCount_);
-    bwdData.reserve(verticesCount_);
+    src.reserve(edgesCount);
+    dst.reserve(edgesCount);
 }
 CGraph::~CGraph(){  }
 
 CGraph::CGraph(const CGraph& graph)
 {
-    fwdData = graph.fwdData;
-    bwdData = graph.bwdData;
+    src = graph.src;
+    dst = graph.dst;
+    edgesCount = graph.edgesCount;
     verticesCount = graph.verticesCount;
 }
     
 CGraph& CGraph::operator=(const CGraph& graph)
 {
-    fwdData = graph.fwdData;
-    bwdData = graph.bwdData;
+    src = graph.src;
+    dst = graph.dst;
+    edgesCount = graph.edgesCount;
     verticesCount = graph.verticesCount;
     return *this;
 }
@@ -30,18 +33,9 @@ CGraph& CGraph::operator=(const CGraph& graph)
 void CGraph::AddEdge(const size_t firstVertex,
                      const size_t secondVertex)
 {
-    if(fwdData.find(firstVertex) == fwdData.end())
-        fwdData[firstVertex] = vector<size_t>();
-    if(bwdData.find(secondVertex) == bwdData.end())
-        bwdData[secondVertex] = vector<size_t>();
-    
-    if(fwdData.find(secondVertex) == fwdData.end())
-        fwdData[secondVertex] = vector<size_t>();
-    if(bwdData.find(firstVertex) == bwdData.end())
-        bwdData[firstVertex] = vector<size_t>();
-    
-    fwdData.at(firstVertex).push_back(secondVertex);
-    bwdData.at(secondVertex).push_back(firstVertex);
+    src.push_back(firstVertex);
+    dst.push_back(secondVertex);
+    edgesCount++;
     return;
 }
 
@@ -50,56 +44,46 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
     VerticesSet res;
     res.insert(pivot);
     
-    queue<size_t> bfsQueue;
-    bfsQueue.push(pivot);
-    cout << pivot << endl;
-
-    for(TypeOfData::iterator pVerticesList = fwdData.begin(); pVerticesList != fwdData.end(); pVerticesList++)
+    vector<bool> d (verticesCount, true); // false - достижима, true - бесконечность (недостижима)
+	d[pivot] = 0;
+    
+    bool any = false;
+    do
     {
-        cout << "Vertex " << pVerticesList->first << ": ";
-        for(vector<size_t>::iterator pVertex = pVerticesList->second.begin(); pVertex != pVerticesList->second.end(); pVertex++)
-        {
-            cout << *pVertex << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-    while(!bfsQueue.empty())
-    {
-        cout << "front: " << bfsQueue.front() << endl;
-        vector<size_t>& verticesList = fwdData.at(bfsQueue.front());
-        cout << 111 << endl;
-        for(vector<size_t>::iterator pVertex = verticesList.begin(); pVertex != verticesList.end(); pVertex++)
-        {
-            if(res.find(*pVertex) == res.end())
+        any = false;
+        for (size_t j = 0; j < edgesCount; j++)
+            if (!d[src[j]])
             {
-                bfsQueue.push(*pVertex);
-                res.insert(*pVertex);
-            } 
-        }
-        bfsQueue.pop();
-    }
+                    d[dst[j]] = false;
+                    res.insert(dst[j]);
+                    any = true;
+            }
+    } while (any);
+    
     return res;
 }
 
 typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
 {
     VerticesSet res;
-    queue<size_t> bfsQueue;
-    bfsQueue.push(pivot);
-    while(!bfsQueue.empty())
+    res.insert(pivot);
+    
+    vector<bool> d (verticesCount, true); // false - достижима, true - бесконечность (недостижима)
+	d[pivot] = 0;
+    
+    bool any = false;
+    do
     {
-        vector<size_t> verticesList = bwdData.at(bfsQueue.front());
-        for(vector<size_t>::iterator pVertex = verticesList.begin(); pVertex != verticesList.end(); pVertex++)
-        {
-            if(res.find(*pVertex) == res.end())
+        any = false;
+        for (size_t j = 0; j < edgesCount; j++)
+            if (!d[dst[j]])
             {
-                bfsQueue.push(*pVertex);
-                res.insert(*pVertex);
-            } 
-        }
-        bfsQueue.pop();
-    }
+                    d[src[j]] = false;
+                    res.insert(src[j]);
+                    any = true;
+            }
+    } while (any);
+    
     return res;
 }
 
@@ -107,23 +91,36 @@ typename CGraph::VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited,
                                  VerticesSet& bwdVisited)
 {
     VerticesSet res;
-    for(TypeOfData::iterator pVerticesList = fwdData.begin(); pVerticesList != fwdData.end(); pVerticesList++)
+    for(size_t i = 0; i < edgesCount; i++)
     {
-        if((fwdVisited.find(pVerticesList->first) == fwdVisited.end()) & (bwdVisited.find(pVerticesList->first) == bwdVisited.end()))
-            res.insert(pVerticesList->first);
+        if((fwdVisited.find(src[i]) == fwdVisited.end()) 
+            & (bwdVisited.find(src[i]) == bwdVisited.end()) 
+            & (res.find(src[i]) == res.end()) 
+            & (fwdVisited.find(dst[i]) == fwdVisited.end()) 
+            & (bwdVisited.find(dst[i]) == bwdVisited.end())
+        )
+            res.insert(src[i]);
+        if((fwdVisited.find(dst[i]) == fwdVisited.end()) 
+            & (bwdVisited.find(dst[i]) == bwdVisited.end()) 
+            & (res.find(dst[i]) == res.end()) 
+            & (fwdVisited.find(src[i]) == fwdVisited.end()) 
+            & (bwdVisited.find(src[i]) == bwdVisited.end())
+        )
+            res.insert(dst[i]);
     }
     return res;
 }
 
+// если есть хоть в одном, то берем (вроде)
 CGraph CGraph::CreateGraphFromVertices(const VerticesSet& vertices)
 {
     CGraph res(vertices.size());
-    for(VerticesSet::const_iterator pVertexInSet = vertices.begin(); pVertexInSet != vertices.end(); pVertexInSet++)
+    for(size_t i = 0; i < edgesCount; i++)
     {
-        for(vector<size_t>::iterator pVertex = fwdData.at(*pVertexInSet).begin(); pVertex != fwdData.at(*pVertexInSet).end(); pVertex++)
+       if((vertices.find(src[i]) != vertices.end()) & (vertices.find(dst[i]) != vertices.end()))
         {
-            if(vertices.find(*pVertex) != vertices.end())
-                res.AddEdge(*pVertexInSet, *pVertex);
+           
+            res.AddEdge(src[i], dst[i]);
         }
     }
     return res;

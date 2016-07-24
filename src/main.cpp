@@ -47,6 +47,7 @@ int main(int argc, char** argv)
         cout << "Error openning file" << endl;
         return 0;
     }
+    
     int verticesCount = 0;
     fInput >> verticesCount;
     if(verticesCount == 0)

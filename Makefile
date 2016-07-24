@@ -1,5 +1,5 @@
-CC=icpc
-CFLAGS= -mmic -openmp
+CC=g++
+CFLAGS= -std=c++11 -fopenmp
 LDFLAGS=
 SRC_DIR=./src
 SOURCES=./src/main.cpp ./src/CGraph.cpp

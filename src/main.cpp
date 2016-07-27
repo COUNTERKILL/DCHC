@@ -6,7 +6,9 @@
 #include <memory>
 #include "CGraph.h"
 
+
 const int THREADS_COUNT = 1;
+int availableThreads = THREADS_COUNT;
 
 using namespace std;
 
@@ -28,6 +30,8 @@ CGraph* AtomicGetJob(queue<CGraph>& graphsQueue)
             runnedJobsCount++;
         }
     }
+    #pragma omp critical(threads_count)
+    availableThreads--;
     return pRes;
 }
 
@@ -36,6 +40,8 @@ void CompliteJob()
 {
     #pragma omp critical(job)
     runnedJobsCount--;
+    #pragma omp critical(threads_count)
+    availableThreads++;
 }
 
 
@@ -57,7 +63,7 @@ int main(int argc, char** argv)
     }
     
     // graph reading
-    CGraph firstCGraph(verticesCount);
+    CGraph firstCGraph(verticesCount, availableThreads);
     while(!fInput.eof())
     {
         int v1 = 0, v2 = 0;
@@ -72,7 +78,8 @@ int main(int argc, char** argv)
         vector<CGraph::VerticesSet> components;
         
         omp_set_num_threads(THREADS_COUNT);
-        
+        omp_set_nested(1);
+        omp_set_dynamic(0);
         #pragma omp parallel
         {
             bool isExit = false;
@@ -178,6 +185,9 @@ int main(int argc, char** argv)
                 }
             }
         }
+        
+        omp_set_nested(0);
+        
         cout << "result: " << endl;
         for(vector<CGraph::VerticesSet>::iterator pComponent = components.begin(); pComponent!= components.end(); pComponent++)
         {

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-CGraph::CGraph(const std::size_t verticesCount_)
+CGraph::CGraph(const std::size_t verticesCount_, std::size_t& availableThreads_):availableThreads(availableThreads_)
 {
     edgesCount = 0;
     verticesCount = verticesCount_;
@@ -13,7 +13,7 @@ CGraph::CGraph(const std::size_t verticesCount_)
 }
 CGraph::~CGraph(){  }
 
-CGraph::CGraph(const CGraph& graph)
+CGraph::CGraph(const CGraph& graph):availableThreads(graph.availableThreads)
 {
     src = graph.src;
     dst = graph.dst;
@@ -44,17 +44,25 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
     VerticesSet res;
     res.insert(pivot);
     
-    vector<bool> d (verticesCount, true); // false - достижима, true - бесконечность (недостижима)
+    vector<int> d (verticesCount, 1); // 0 - достижима, 1 - бесконечность (недостижима)
     d[pivot] = 0;
     
+    int threadsCount = 1;
+    #pragma omp critical(threads_count)
+    {
+        threadsCount = availableThreads + 1;
+    }
+    omp_set_num_threads(threadsCount);
     bool any = false;
     do
     {
         any = false;
+        #pragma omp parallel for schedule(static)
         for (size_t j = 0; j < edgesCount; j++)
             if (!d[src[j]] & d[dst[j]])
             {
-                    d[dst[j]] = false;
+                    d[dst[j]] = 0;
+                    #pragma omp critical
                     res.insert(dst[j]);
                     any = true;
             }
@@ -68,9 +76,16 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
     VerticesSet res;
     res.insert(pivot);
     
-    vector<bool> d (verticesCount, true); // false - достижима, true - бесконечность (недостижима)
+    vector<int> d (verticesCount, 1); // 0 - достижима, 1 - бесконечность (недостижима)
     d[pivot] = 0;
     
+    int threadsCount = 1;
+    #pragma omp critical(threads_count)
+    {
+        threadsCount = availableThreads + 1;
+    }
+    omp_set_num_threads(threadsCount);
+
     bool any = false;
     do
     {
@@ -78,7 +93,8 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
         for (size_t j = 0; j < edgesCount; j++)
             if (!d[dst[j]] & d[src[j]])
             {
-                    d[src[j]] = false;
+                    d[src[j]] = 0;
+                    #pragma omp critical
                     res.insert(src[j]);
                     any = true;
             }
@@ -114,7 +130,7 @@ typename CGraph::VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited,
 // если есть хоть в одном, то берем (вроде)
 CGraph CGraph::CreateGraphFromVertices(const VerticesSet& vertices)
 {
-    CGraph res(vertices.size());
+    CGraph res(vertices.size(), availableThreads);
     for(size_t i = 0; i < edgesCount; i++)
     {
        if((vertices.find(src[i]) != vertices.end()) & (vertices.find(dst[i]) != vertices.end()))

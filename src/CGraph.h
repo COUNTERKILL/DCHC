@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 #include <unordered_set>
 
 
@@ -11,12 +10,9 @@ class CGraph
 public:
     // тип набор вершин
     typedef std::unordered_set<std::size_t> VerticesSet;
-private:
-    // список смежности, хранящий структуру графа
-    //typedef std::unordered_map<std::size_t, std::vector<std::size_t>> TypeOfData;
 public:
     // конструктор. Принимает один параметр - количество вершин в графе
-    CGraph(const std::size_t verticesCount);
+    CGraph(const std::size_t verticesCount, std::size_t& availableThreads);
     virtual ~CGraph();
     CGraph(const CGraph&);
     CGraph& operator=(const CGraph&);
@@ -33,10 +29,9 @@ public:
     // GetRandomVertex() должна возвращать случайный вектор.
     std::size_t GetRandomVertex() { return src.at(0); };
 private:
-    //TypeOfData fwdData;                 // список смежности для приямого обхода
-    //TypeOfData bwdData;                 // список смежности, в котором все ребра развернуты для обратного обхода
     std::vector<size_t> src;
     std::vector<size_t> dst;
     std::size_t verticesCount = 0;      // количество вершин
     std::size_t edgesCount = 0;      // количество ребер
+    std::sie_t& availableThreads; // алгоритм Беллмана-Форда запускается с количеством нитей availableThreads + 1 (текущая)
 };

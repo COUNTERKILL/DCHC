@@ -12,7 +12,7 @@ public:
     typedef std::unordered_set<std::size_t> VerticesSet;
 public:
     // конструктор. Принимает один параметр - количество вершин в графе
-    CGraph(const std::size_t verticesCount, std::size_t& availableThreads);
+    CGraph(const std::size_t verticesCount, int& availableThreads);
     virtual ~CGraph();
     CGraph(const CGraph&);
     CGraph& operator=(const CGraph&);
@@ -33,5 +33,5 @@ private:
     std::vector<size_t> dst;
     std::size_t verticesCount = 0;      // количество вершин
     std::size_t edgesCount = 0;      // количество ребер
-    std::sie_t& availableThreads; // алгоритм Беллмана-Форда запускается с количеством нитей availableThreads + 1 (текущая)
+    int& availableThreads; // алгоритм Беллмана-Форда запускается с количеством нитей availableThreads + 1 (текущая)
 };

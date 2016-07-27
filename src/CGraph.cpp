@@ -1,10 +1,11 @@
 #include "CGraph.h"
 #include <queue>
 #include <iostream>
+#include <omp.h>
 
 using namespace std;
 
-CGraph::CGraph(const std::size_t verticesCount_, std::size_t& availableThreads_):availableThreads(availableThreads_)
+CGraph::CGraph(const std::size_t verticesCount_, int& availableThreads_):availableThreads(availableThreads_)
 {
     edgesCount = 0;
     verticesCount = verticesCount_;
@@ -50,9 +51,10 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
     int threadsCount = 1;
     #pragma omp critical(threads_count)
     {
-        threadsCount = availableThreads + 1;
+        threadsCount = availableThreads > 0 ? availableThreads + 1 : 1;
+        availableThreads -= (threadsCount-1);
     }
-    omp_set_num_threads(threadsCount);
+    omp_set_num_threads(availableThreads);
     bool any = false;
     do
     {
@@ -82,7 +84,8 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
     int threadsCount = 1;
     #pragma omp critical(threads_count)
     {
-        threadsCount = availableThreads + 1;
+        threadsCount = availableThreads > 0 ? availableThreads + 1 : 1;
+        availableThreads -= (threadsCount-1);
     }
     omp_set_num_threads(threadsCount);
 

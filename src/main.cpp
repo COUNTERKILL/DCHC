@@ -6,11 +6,12 @@
 #include <memory>
 #include "CGraph.h"
 
+using namespace std;
 
-const int THREADS_COUNT = 1;
+const int THREADS_COUNT = 10;
 int availableThreads = THREADS_COUNT;
 
-using namespace std;
+
 
 
 
@@ -23,15 +24,18 @@ CGraph* AtomicGetJob(queue<CGraph>& graphsQueue)
     CGraph *pRes = NULL;
     #pragma omp critical(job)
     {
-        if(!graphsQueue.empty())
+        #pragma omp critical(threads_count)
         {
-            pRes = new CGraph(graphsQueue.front());
-            graphsQueue.pop();
-            runnedJobsCount++;
+            if(!graphsQueue.empty())
+            {
+                pRes = new CGraph(graphsQueue.front());
+                graphsQueue.pop();
+                runnedJobsCount++;
+                
+                availableThreads--;
+            }
         }
     }
-    #pragma omp critical(threads_count)
-    availableThreads--;
     return pRes;
 }
 
@@ -41,7 +45,9 @@ void CompliteJob()
     #pragma omp critical(job)
     runnedJobsCount--;
     #pragma omp critical(threads_count)
-    availableThreads++;
+    {
+        availableThreads++;
+    }
 }
 
 

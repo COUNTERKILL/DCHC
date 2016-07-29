@@ -87,12 +87,13 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
         threadsCount = availableThreads > 0 ? availableThreads + 1 : 1;
         availableThreads -= (threadsCount-1);
     }
-    omp_set_num_threads(threadsCount);
+    //omp_set_num_threads(threadsCount);
 
     bool any = false;
     do
     {
         any = false;
+        #pragma omp parallel for num_threads(threadsCount) schedule(static)
         for (size_t j = 0; j < edgesCount; j++)
             if (!d[dst[j]] & d[src[j]])
             {

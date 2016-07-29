@@ -29,8 +29,8 @@ public:
     // GetRandomVertex() должна возвращать случайный вектор.
     std::size_t GetRandomVertex() { return src.at(0); };
 private:
-    std::vector<size_t> src;
-    std::vector<size_t> dst;
+    std::vector<std::size_t> src;
+    std::vector<std::size_t> dst;
     std::size_t verticesCount = 0;      // количество вершин
     std::size_t edgesCount = 0;      // количество ребер
     int& availableThreads; // алгоритм Ѕеллмана-‘орда запускаетс€ с количеством нитей availableThreads + 1 (текуща€)

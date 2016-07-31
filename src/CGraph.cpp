@@ -47,7 +47,6 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
     res.insert(pivot);
     
     vector<int> d (verticesCount, 1); // 0 - достижима, 1 - бесконечность (недостижима)
-    d[pivot] = 0;
     
     int threadsCount = 1;
     #pragma omp critical(threads_count)
@@ -56,7 +55,7 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
         availableThreads -= (threadsCount-1);
     }
     
-    BallmanFord(src.begin(), dst.begin(), d.begin(), edgesCount, verticesCount, threadsCount);
+    BallmanFord((size_t*)&src[0], (size_t*)&dst[0], pivot, (int*)&d[0], edgesCount, verticesCount, threadsCount);
     
     for(size_t i = 0; i < verticesCount; i++)
     {
@@ -83,7 +82,7 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
         availableThreads -= (threadsCount-1);
     }
     
-    BallmanFord(dst.begin(), src.begin(), d.begin(), edgesCount, verticesCount, threadsCount);
+    BallmanFord((size_t*)&dst[0], (size_t*)&src[0], pivot,  (int*)&d[0], edgesCount, verticesCount, threadsCount);
     
     for(size_t i = 0; i < verticesCount; i++)
     {
@@ -122,7 +121,8 @@ typename CGraph::VerticesSet CGraph::GetUnvisited(VerticesSet& fwdVisited,
 // если есть хоть в одном, то берем (вроде)
 CGraph CGraph::CreateGraphFromVertices(const VerticesSet& vertices)
 {
-    CGraph res(vertices.size(), availableThreads);
+    CGraph res(verticesCount, availableThreads);
+
     for(size_t i = 0; i < edgesCount; i++)
     {
        if((vertices.find(src[i]) != vertices.end()) & (vertices.find(dst[i]) != vertices.end()))

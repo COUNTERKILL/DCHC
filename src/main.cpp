@@ -104,6 +104,7 @@ int main(int argc, char** argv)
                     CGraph::VerticesSet component;
                     CGraph::VerticesSet verticesFoundedInFwdButNotInBwd;
                     CGraph::VerticesSet verticesFoundedInBwdButNotInFwd;
+		    
                     // writing components
                     for(CGraph::VerticesSet::iterator pVertex = fwd.begin(); pVertex != fwd.end(); pVertex++)
                     {

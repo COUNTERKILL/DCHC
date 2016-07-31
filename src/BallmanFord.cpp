@@ -1,8 +1,9 @@
 #include "BallmanFord.h"
-
 #define ALLOC alloc_if(1) free_if(0)
 #define FREE alloc_if(0) free_if(1)
 #define REUSE alloc_if(0) free_if(0)
+#include <omp.h>
+#include <iostream>
 
 using namespace std;
 
@@ -16,9 +17,9 @@ void BallmanFordPhi(const size_t *pSrc,
 )
 {
     #pragma offload target(mic:0) \
-    in(src: length(edgesCount) ALLOC) \
-    in(dst: length(edgesCount) ALLOC) \
-    in(pAttainabilities: length(verticesCount) ALLOC)
+    in(pSrc: length(edgesCount) ALLOC) \
+    in(pDst: length(edgesCount) ALLOC) \
+    inout(pAttainabilities: length(verticesCount) ALLOC)
     {
         bool any = false;
         do
@@ -27,15 +28,15 @@ void BallmanFordPhi(const size_t *pSrc,
             
             #pragma omp parallel for num_threads(244) schedule(static)
             for (size_t j = 0; j < edgesCount; j++)
-                if (!pAttainabilities[dst[j]] & pAttainabilities[src[j]])
+                if (pAttainabilities[pDst[j]] & !pAttainabilities[pSrc[j]])
                 {
-                        pAttainabilities[src[j]] = 0;
+                        pAttainabilities[pDst[j]] = 0;
                         any = true;
                 }
         } while (any);
-    }
-    #pragma offload target(mic:0) \
-    out(pAttainabilities: length(0) FREE)
+    };
+    
+    phiIsUsing = false;
     return;
 }
 
@@ -46,7 +47,6 @@ void BallmanFordCPU(const size_t *pSrc,
                     int threadsCount
 )
 {
-    omp_set_num_threads(threadsCount);
     bool any = false;
     do
     {
@@ -54,9 +54,9 @@ void BallmanFordCPU(const size_t *pSrc,
         
         #pragma omp parallel for num_threads(threadsCount) schedule(static)
         for (size_t j = 0; j < edgesCount; j++)
-            if (!pAttainabilities[dst[j]] & pAttainabilities[src[j]])
+            if (pAttainabilities[pDst[j]] & !pAttainabilities[pSrc[j]])
             {
-                    pAttainabilities[src[j]] = 0;
+                    pAttainabilities[pDst[j]] = 0;
                     any = true;
             }
     } while (any);
@@ -76,7 +76,7 @@ void BallmanFord(const size_t *pSrc,
     pAttainabilities[pivot] = 0;
     
     bool isUsePhi = false;
-    #pragma omp critical
+    #pragma omp critical(phi_using)
     {
         if(!phiIsUsing)
         {

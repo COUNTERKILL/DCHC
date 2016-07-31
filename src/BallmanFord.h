@@ -1,4 +1,7 @@
 #pragma once
+
+#include <cstring>
+
 void BallmanFord(const std::size_t *pSrc, 
                  const std::size_t *pDst, 
                  std::size_t pivot,

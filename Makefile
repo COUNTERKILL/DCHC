@@ -1,8 +1,8 @@
-CC=g++
+CC=icpc
 CFLAGS= -std=c++11 -fopenmp
 LDFLAGS=
 SRC_DIR=./src
-SOURCES=./src/main.cpp ./src/CGraph.cpp
+SOURCES=./src/main.cpp ./src/CGraph.cpp ./src/BallmanFord.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 BIN_DIR=./bin
 EXECUTABLE=main.o

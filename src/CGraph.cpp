@@ -2,6 +2,7 @@
 #include <queue>
 #include <iostream>
 #include <omp.h>
+#include "BallmanFord.h"
 
 using namespace std;
 
@@ -54,22 +55,16 @@ CGraph::VerticesSet CGraph::ForwardBFS(size_t pivot)
         threadsCount = availableThreads > 0 ? availableThreads + 1 : 1;
         availableThreads -= (threadsCount-1);
     }
-    omp_set_num_threads(availableThreads);
-    bool any = false;
-    do
-    {
-        any = false;
-        #pragma omp parallel for schedule(static)
-        for (size_t j = 0; j < edgesCount; j++)
-            if (!d[src[j]] & d[dst[j]])
-            {
-                    d[dst[j]] = 0;
-                    #pragma omp critical
-                    res.insert(dst[j]);
-                    any = true;
-            }
-    } while (any);
     
+    BallmanFord(src.begin(), dst.begin(), d.begin(), edgesCount, verticesCount, threadsCount);
+    
+    for(size_t i = 0; i < verticesCount; i++)
+    {
+        if(!d[i])
+        {
+            res.insert(i);
+        }
+    }
     return res;
 }
 
@@ -87,23 +82,16 @@ typename CGraph::VerticesSet CGraph::BackwardBFS(size_t pivot)
         threadsCount = availableThreads > 0 ? availableThreads + 1 : 1;
         availableThreads -= (threadsCount-1);
     }
-    //omp_set_num_threads(threadsCount);
-
-    bool any = false;
-    do
-    {
-        any = false;
-        #pragma omp parallel for num_threads(threadsCount) schedule(static)
-        for (size_t j = 0; j < edgesCount; j++)
-            if (!d[dst[j]] & d[src[j]])
-            {
-                    d[src[j]] = 0;
-                    #pragma omp critical
-                    res.insert(src[j]);
-                    any = true;
-            }
-    } while (any);
     
+    BallmanFord(dst.begin(), src.begin(), d.begin(), edgesCount, verticesCount, threadsCount);
+    
+    for(size_t i = 0; i < verticesCount; i++)
+    {
+        if(!d[i])
+        {
+            res.insert(i);
+        }
+    }
     return res;
 }
 
